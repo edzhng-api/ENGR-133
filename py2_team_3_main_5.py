@@ -30,11 +30,13 @@ Academic Integrity Statement:
     submitting is my own original work.
 """
 
-""" Write any import statements here (and delete this line)."""
+import py2_team_3_volume_5 as vol
+import py2_team_3_mass_5 as mass
+import py2_team_3_escape_velocity_5 as ev
 
 
 def main():
-    """Write your code here (and delete this line)."""
+    G = 6.674 * 10**-11
 
 
 if __name__ == "__main__":
