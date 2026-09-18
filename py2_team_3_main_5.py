@@ -44,7 +44,7 @@ def main():
     e_v = ev.calc_escape_velocity(G, mass_value, r)
     r = r/1000
 
-    print(f"For a a planet with radius {r:.1f} km and density {rho:.2f} kg/m^3, the estimated escape velocity is {e_v:.2f} m/s")
+    print(f"For a planet with radius {r:,.1f} km and density {rho:,.2f} kg/m^3, the estimated escape velocity is {e_v:,.2f} m/s")
 
 
 
