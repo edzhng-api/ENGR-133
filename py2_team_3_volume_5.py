@@ -6,7 +6,7 @@ Description:
     Replace this line with a description of your program.
 
 Assignment Information:
-    Assignment:     Py 2 Team 3 Volume
+    Assignment:     Py2 Team 3 Volume
     Team ID:        SC1 - 05
     Author:         Edison Zheng, zhen1058@purdue.edu
     Date:           9/15/2026
@@ -33,7 +33,7 @@ Academic Integrity Statement:
 
 import math as m
 
-def calc_volume(radius):
+def calc_volume(radius): #calculates volume of a planet given radius
     volume  = (4/3) * m.pi * m.pow(radius, 3)
     return volume
 

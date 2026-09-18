@@ -6,7 +6,7 @@ Description:
     Replace this line with a description of your program.
 
 Assignment Information:
-    Assignment:     Py 2 Team 3 Escape Velocity
+    Assignment:     Py2 Team 3 Escape Velocity
     Team ID:        SC1 - 05
     Author:         Edison Zheng, zhen1058@purdue.edu
     Date:           9/15/2026
@@ -34,7 +34,7 @@ Academic Integrity Statement:
 import math as m
 
 
-def calc_escape_velocity(G, mass, radius):
+def calc_escape_velocity(G, mass, radius): #calculates escape velocity of a planet given G, mass, and radius, and checks for invalid values
     if radius <= 0:
         print("Radius must be greater than zero!")
         return 0
