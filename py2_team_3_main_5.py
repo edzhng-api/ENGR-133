@@ -6,7 +6,7 @@ Description:
     Replace this line with a description of your program.
 
 Assignment Information:
-    Assignment:     Py 2 Team 3
+    Assignment:     Py 2 Team 3 Main
     Team ID:        SC1 - 05
     Author:         Edison Zheng, zhen1058@purdue.edu
     Date:           9/15/2026
@@ -36,7 +36,7 @@ import py2_team_3_escape_velocity_5 as ev
 
 
 def main():
-    G = 6.674 * 10**-11
+    G = 6.6743 * 10**-11
     rho = float(input("Enter the average density of the planet: "))
     r = float(input("Enter the radius of the planet: "))
     volume = vol.calc_volume(r)
