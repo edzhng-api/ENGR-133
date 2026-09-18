@@ -33,7 +33,9 @@ Academic Integrity Statement:
 
 import math as m
 
-
+def calc_mass(density, volume):
+    mass = density * volume
+    return mass
 def main():
     """Write your code here (and delete this line)."""
 

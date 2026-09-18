@@ -31,8 +31,19 @@ Academic Integrity Statement:
     submitting is my own original work.
 """
 
-""" Write any import statements here (and delete this line)."""
+import math as m
 
+
+def calc_escape_velocity(G, mass, radius):
+    if radius <= 0:
+        print("Radius must be greater than zero!")
+        return 0
+    elif mass <= 0:
+        print("Mass must be greater than zero!")
+        return 0
+    else:
+        v_e = m.sqrt((2 * G * mass) / radius)
+        return v_e
 
 def main():
     """Write your code here (and delete this line)."""

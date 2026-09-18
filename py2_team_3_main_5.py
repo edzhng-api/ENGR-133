@@ -37,6 +37,15 @@ import py2_team_3_escape_velocity_5 as ev
 
 def main():
     G = 6.674 * 10**-11
+    rho = float(input("Enter the average density of the planet: "))
+    r = float(input("Enter the radius of the planet: "))
+    volume = vol.calc_volume(r)
+    mass = mass.calc_mass(rho, volume)
+    e_v = ev.calc_escape_velocity(G, mass, r)
+    r = r/1000
+
+    print(f"For a a planet with radius {r:.1f} km and density {rho:.2f} kg/m^3, the estimated escape velocity is {e_v:.2f} m/s")
+
 
 
 if __name__ == "__main__":
