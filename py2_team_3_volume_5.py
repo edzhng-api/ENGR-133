@@ -34,7 +34,7 @@ Academic Integrity Statement:
 import math as m
 
 def calc_volume(radius):
-    volume  = (4/3) * m.pi * radius**3
+    volume  = (4/3) * m.pi * m.pow(radius, 3)
     return volume
 
 def main():
