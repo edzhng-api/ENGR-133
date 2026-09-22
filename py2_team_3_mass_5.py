@@ -37,7 +37,7 @@ def calc_mass(density, volume): #calculates mass of a planet given density and v
     mass = density * volume
     return mass
 def main():
-    
+    m = input("how is this?")
 
 
 if __name__ == "__main__":
