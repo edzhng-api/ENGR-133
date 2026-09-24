@@ -3,10 +3,10 @@ Course Number: ENGR 13300
 Semester: Fall 2026
 
 Description:
-    Replace this line with a description of your program.
+    Factorial function created with for loops and conditionals.
 
 Assignment Information:
-    Assignment:     15.2.2 Py3 Team 2 
+    Assignment:     Py3 Team 2 B
     Team ID:        SC1 - 05 
     Author:         Anthony Do, do132@purdue.edu
     Date:           09/22/2026
