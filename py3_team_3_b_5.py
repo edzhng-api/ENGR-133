@@ -55,14 +55,21 @@ def my_sum(n, x):
 def main():
     x = int(input("Enter the value of x: "))
     desired_error = int(input("Enter the target error threshold: "))
+    actual_value = m.e ** x
     error = m.nan
     n = 0
     while True:
-        if error < 0.01:
+        aprox_sum = my_sum(n, x)
+        error = abs(aprox_sum-actual_value) / actual_value * 100
+        if error < desired_error:
             break  
         else:
-            n=+1
-        my_sum(n, x)
+            n += 1
+
+    print(f"Terms needed: {n+1}")
+    print(f"Actual value: {actual_value:,.2f}")
+    print(f"Approximate value: {aprox_sum:,.2f}")
+    print(f"Target error threshold: {desired_error:.1f}%")
 
 if __name__ == "__main__":
     main()
