@@ -12,7 +12,7 @@ Assignment Information:
     Date:           09/22/2026
 
 Contributors:
-    Name, login@purdue [repeat for each]
+    Edison Zheng, zhen1058@purdue.edu
 
     My contributor(s) helped me:
     [ ] understand the assignment expectations without
@@ -33,10 +33,23 @@ Academic Integrity Statement:
 
 """ Write any import statements here (and delete this line)."""
 
-def my_factorial(x):
-    
+#Calculates the factorial of the given integer. Checks for a negative value, if true, returns an error, otherwise returns the factorial
+def my_factorial(integer):
+    if integer < 0: #Check if the integer is valid
+        return -999
+    else: 
+        factorial = 1 #Set inital value to make code work
+        for i in range(integer):
+            factorial = factorial*integer
+            integer=integer-1 #Increment down 1 to find factorial
+        return factorial
+
 def main():
-    
+    number = int(input("Enter a number: ")) #Takes an integer input
+    if number < 0: #Checks if input is valid
+        print(f"Error {my_factorial(number)} [Negative input].")
+        return #Exits the program
+    print(f"The Factorial of {number} is {my_factorial(number)}.") #Displays the result
 
 
 if __name__ == "__main__":
