@@ -34,11 +34,32 @@ Academic Integrity Statement:
 import math as m
 import numpy as np
 
-My_Factorial = m.factorial
+def my_factorial(integer):
+    if integer < 0: #Check if the integer is valid
+        return -999
+    else: 
+        factorial = 1 #Set inital value to make code work
+        for i in range(integer):
+            factorial = factorial*integer
+            integer=integer-1 #Increment down 1 to find factorial
+        return factorial
+
+def maclaurin_step(x, n):
+    return (x ** n) / my_factorial(n)
+
+def my_sum(n, x):
+    return sum(maclaurin_step(x, i) for i in range(0, n + 1))
 
 def main():
-    m.factorial(2)
+    n = int(input("Enter the value of n: "))
+    x = int(input("Enter the value of x: "))
+    aprox_sum = my_sum(n, x)
+    actual_value = m.e ** x
+    error = (aprox_sum-actual_value) / actual_value * 100
 
+    print(f"Actual value: {actual_value:,.2f}")
+    print(f"Approximate value: {aprox_sum:,.2f}")
+    print(f"Error: {error:,.2f}")
 
 if __name__ == "__main__":
     main()
