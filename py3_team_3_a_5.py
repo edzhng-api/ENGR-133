@@ -3,10 +3,10 @@ Course Number: ENGR 13300
 Semester: Fall 2026
 
 Description:
-    Replace this line with a description of your program.
+    Aproximates e^x using the Maclaurin series expansion with given values of n and x.
 
 Assignment Information:
-    Assignment:     15.2.3. Task 3
+    Assignment:     15.2.3. Py3 Team 3 A
     Team ID:        SC1 - 05
     Author:         Reese Jared, rjared@purdue.edu
     Date:           09/24/2026
@@ -52,14 +52,14 @@ def my_sum(n, x):
 
 def main():
     n = int(input("Enter the value of n: "))
-    x = int(input("Enter the value of x: "))
+    x = float(input("Enter the value of x: "))
     aprox_sum = my_sum(n, x)
     actual_value = m.e ** x
     error = (aprox_sum-actual_value) / actual_value * 100
 
-    print(f"Actual value: {actual_value:,.2f}")
-    print(f"Approximate value: {aprox_sum:,.2f}")
-    print(f"Error: {error:,.2f}")
+    print(f"Actual value: {actual_value:.2f}")
+    print(f"Approximate value: {aprox_sum:.2f}")
+    print(f"Error: {error:.1f}%")
 
 if __name__ == "__main__":
     main()

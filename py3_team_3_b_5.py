@@ -3,10 +3,10 @@ Course Number: ENGR 13300
 Semester: Fall 2026
 
 Description:
-    Replace this line with a description of your program.
+    Aproximates e^x using the Maclaurin series expansion with given values of x and maximum error.
 
 Assignment Information:
-    Assignment:     15.2.3. Task 3
+    Assignment:     15.2.3. Py3 Team 3 B
     Team ID:        SC1 - 05
     Author:         Reese Jared, rjared@purdue.edu
     Date:           09/24/2026
@@ -53,8 +53,8 @@ def my_sum(n, x):
     return sum(maclaurin_step(x, i) for i in range(0, n + 1))
 
 def main():
-    x = int(input("Enter the value of x: "))
-    desired_error = int(input("Enter the target error threshold: "))
+    x = float(input("Enter the value of x: "))
+    desired_error = float(input("Enter the target error threshold: "))
     actual_value = m.e ** x
     error = m.nan
     n = 0
@@ -67,8 +67,8 @@ def main():
             n += 1
 
     print(f"Terms needed: {n+1}")
-    print(f"Actual value: {actual_value:,.2f}")
-    print(f"Approximate value: {aprox_sum:,.2f}")
+    print(f"Actual value: {actual_value:.2f}")
+    print(f"Approximate value: {aprox_sum:.2f}")
     print(f"Target error threshold: {desired_error:.1f}%")
 
 if __name__ == "__main__":
