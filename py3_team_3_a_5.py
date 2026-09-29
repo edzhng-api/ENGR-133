@@ -3,10 +3,10 @@ Course Number: ENGR 13300
 Semester: Fall 2026
 
 Description:
-    Replace this line with a description of your program.
+    Aproximates e^x using the Maclaurin series expansion with given values of n and x.
 
 Assignment Information:
-    Assignment:     15.2.3. Task 3
+    Assignment:     15.2.3. Py3 Team 3 A
     Team ID:        SC1 - 05
     Author:         Reese Jared, rjared@purdue.edu
     Date:           09/24/2026
@@ -34,11 +34,32 @@ Academic Integrity Statement:
 import math as m
 import numpy as np
 
-My_Factorial = m.factorial
+def my_factorial(integer):
+    if integer < 0: #Check if the integer is valid
+        return -999
+    else: 
+        factorial = 1 #Set inital value to make code work
+        for i in range(integer):
+            factorial = factorial*integer
+            integer=integer-1 #Increment down 1 to find factorial
+        return factorial
+
+def maclaurin_step(x, n):
+    return (x ** n) / my_factorial(n)
+
+def my_sum(n, x):
+    return sum(maclaurin_step(x, i) for i in range(0, n + 1))
 
 def main():
-    m.factorial(2)
+    n = int(input("Enter the value of n: "))
+    x = float(input("Enter the value of x: "))
+    aprox_sum = my_sum(n, x)
+    actual_value = m.e ** x
+    error = (aprox_sum-actual_value) / actual_value * 100
 
+    print(f"Actual value: {actual_value:.2f}")
+    print(f"Approximate value: {aprox_sum:.2f}")
+    print(f"Error: {error:.1f}%")
 
 if __name__ == "__main__":
     main()
