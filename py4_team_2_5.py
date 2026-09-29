@@ -3,10 +3,10 @@ Course Number: ENGR 13300
 Semester: Fall 2026
 
 Description:
-    Replace this line with a description of your program.
+    The user inputs their first and last name, date of birth, and the current date. The program calculates their age in years and seconds and saves the information to a text file and displays it.
 
 Assignment Information:
-    Assignment:     16.2.2. Py4 Task 2
+    Assignment:     16.2.2. Py4 team 2
     Team ID:        SC1 - 05
     Author:         Reese Jared, rjared@purdue.edu
     Date:           09/29/2026
@@ -34,8 +34,7 @@ Academic Integrity Statement:
 from datetime import date
 
 def main():
-    f = open("py4_team_2_5.txt", "r+")
-    f.truncate(0)  # Clear the file contents before writing new data
+    f = open("py4_team_2_5.txt", "w+") #creates the file if it’s missing and clears it on each run
     Additional_Entry = "yes"
     while Additional_Entry == "yes":
         try:
@@ -68,8 +67,6 @@ def main():
         except Exception as e:
             print(f"An error occurred: {e}")
             """
-    f.seek(0)  # Move the file pointer to the beginning of the file
-    print(f.read())
     f.close()
 
 if __name__ == "__main__":
