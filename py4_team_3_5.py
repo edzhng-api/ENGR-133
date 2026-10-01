@@ -32,12 +32,16 @@ Academic Integrity Statement:
 """
 
 
-
+#This function calculates the concentration of a substance given its absorbency, path length, and molar extinction coefficient, and prints the results.            
+def absorb_calc(a, b, c):
+    for i in range(len(a)):
+        concentration = a[i] / (b * c)
+        print(f"For {a[i]:.4f} absorbency value, the concentration is {concentration:.7f}")
 def main():
-    data = {"Absorbency": []} #Initialize a dictionary to store the data from the file
+    data = {"Absorbency": []}
     with open("py4_task3_input.txt", "r") as f:
-        for line in f: #Read each line from the file
-            line = line.strip() #Remove leading and trailing whitespace from the line
+        for line in f: 
+            line = line.strip() 
             if not line:
                 continue
             key, value = line.split(":", 1) #Split a pair at :
@@ -50,13 +54,6 @@ def main():
             else:
                 data[key] = float(value)
     
-    #This function calculates the concentration of a substance given its absorbency, path length, and molar extinction coefficient, and prints the results.            
-    def absorb_calc(a, b, c):
-        for i in range(len(a)):
-            concentration = a[i] / (b * c)
-            print(f"For {a[i]} absorbency value, the concentration is {concentration:.7f}")
-    
-    #Calls the function and output
     print(f"The name of the substance is {data["Name"]}")
     absorb_calc(data["Absorbency"], data["Path Length"], data["Molar Extinction Coefficient"])
 
