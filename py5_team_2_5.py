@@ -32,22 +32,26 @@ Academic Integrity Statement:
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 from PIL import Image
-from PIL import ImageOps
+import matplotlib.pyplot as plt
 
-def linearize(c):
+def linearize_image(image_array):
     return np.where(
-        c <= 0.04045,
-        c / 12.92,
-        ((c + 0.055) / 1.055) ** 2.4,
+        image_array <= 0.04045,
+        image_array / 12.92,
+        ((image_array + 0.055) / 1.055) ** 2.4,
     )
 
-def load_img(path):
-    image_array = np.array(Image.open(path))
-    float_image_array = image_array.astype(float) / 255.0  # Normalize to [0, 1]
-    linearized_image_array = linearize(float_image_array)
-    return linearized_image_array
+def load_img(path): #Opens the image, converts it to RGB if it has an alpha channel, normalizes it, and linearizes it.
+    with Image.open(path) as pil_image:
+        if "A" in pil_image.getbands():
+            pil_image = pil_image.convert("RGB")
+        image_array = np.array(pil_image)
+    normalized_image = normalize_image(image_array)
+    return linearize_image(normalized_image)
+
+def normalize_image(image_array):
+    return image_array.astype(float) / 255.0
 
 def rgb_to_grayscale(rgb_image):
     R = np.array(rgb_image)[:,:,0]
@@ -57,16 +61,20 @@ def rgb_to_grayscale(rgb_image):
     return Y
 
 def main():
-    image_path = load_img(input("Enter the path of the image you want to load: "))
-    if len(image_path.shape) == 2:  # Check if the image is already grayscale
-        plt.imshow(image_path, cmap='gray')
+    image_path = input("Enter the path of the image you want to load: ")
+
+    # load_img converts, normalizes, and linearizes the image.
+    linearized_image = load_img(image_path)
+
+    if len(linearized_image.shape) == 2:  # Check if the image is already grayscale
+        plt.imshow(linearized_image, cmap='gray')
     else:
         convert = input("Would you like to convert to grayscale? ")
         if convert == "yes":
-            grayscale_image = rgb_to_grayscale(image_path)
+            grayscale_image = rgb_to_grayscale(linearized_image)
             plt.imshow(grayscale_image, cmap='gray')
         else:
-            plt.imshow(image_path, cmap='gray')
+            plt.imshow(linearized_image, cmap='gray')
     plt.axis('off')  # Hide axes
     plt.show()
 
