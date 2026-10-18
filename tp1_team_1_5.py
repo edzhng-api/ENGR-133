@@ -37,18 +37,9 @@ from PIL import Image,ImageOps
 import matplotlib.pyplot as plt
 
 
-#Reused functions to linearize and load images
-def linearize(c):
-    return np.where(
-        c <= 0.04045,
-        c / 12.92,
-        ((c + 0.055) / 1.055) ** 2.4,
-    )
+#Reused functions to load images
 def load_img(path):
-    image_array = np.array(Image.open(path))
-    float_image_array = image_array.astype(float) / 255.0  # Normalize to [0, 1]
-    linearized_image_array = linearize(float_image_array)
-    return linearized_image_array
+    return np.array(Image.open(path))
 def resize_image(original_image_array, new_size):
     # Convert the NumPy array to a Pillow image
     img = Image.fromarray(original_image_array)
@@ -89,9 +80,9 @@ def rgb_to_hsv(R,G,B):
         s = diff/c_max
     
     #Rescale between 0 to 255
-        h = (h/360)*255
-        s *= 255
-        v *= 255
+    h = h*255/360
+    s *= 255
+    v *= 255
         
     return h,s,v
 def convert_to_hsv(rgb_image):
@@ -100,14 +91,15 @@ def convert_to_hsv(rgb_image):
     #Loops through each pixel and converts to hsv
     for i in range(height):
         for j in range(width):
-            for k in range (depth):
-                hsv[i,j,k] = rgb_to_hsv(rgb_image[i], rgb_image[j], rgb_image[k])
+            R, G, B = rgb_image[i, j, 0:3]
+            hsv[i,j] = rgb_to_hsv(int(R), int(G), int(B))
     hsv.astype(np.uint8)
     return hsv
 def main():
     path = input("Enter the path of the RGB image you want to convert to hsv: ")
     img_array = load_img(path)
     hsv = convert_to_hsv(img_array)
+    # Resize to fit within 100 x 100 while keeping the aspect ratio
     orig_height, orig_width = img_array.shape[:2]
     orig_aspectRatio = orig_width / orig_height
     target_aspectRatio = 100 / 100
@@ -124,6 +116,7 @@ def main():
     print(f"RGB values of the ({pixel_x}, {pixel_y}) pixel: R={img_array[pixel_x,pixel_y,0]}, G={img_array[pixel_x,pixel_y,1]}, B={img_array[pixel_x,pixel_y,2]}")
     print(f"Converting {path} to HSV...")
     print(f"HSV values of the ({pixel_x}, {pixel_y}) pixel: H={hsv[pixel_x,pixel_y,0]}, S={hsv[pixel_x,pixel_y,1]}, V={hsv[pixel_x,pixel_y,2]}")
+
 
     plt.imshow(padded_img)
     plt.axis("off")
