@@ -3,7 +3,8 @@ Course Number: ENGR 13300
 Semester: Fall 2026
 
 Description:
-    Replace this line with a description of your program.
+    Converts an RGB image to HSV (each channel scaled to 0-255), prints the
+    RGB and HSV values of a chosen pixel, and displays the HSV image.
 
 Assignment Information:
     Assignment:     TP1 Team 1
@@ -37,9 +38,19 @@ from PIL import Image,ImageOps
 import matplotlib.pyplot as plt
 
 
-#Reused functions to load images
+#Reused functions to linearize and load images
+def linearize(c):
+    return np.where(
+        c <= 0.04045,
+        c / 12.92,
+        ((c + 0.055) / 1.055) ** 2.4,
+    )
 def load_img(path):
-    return np.array(Image.open(path))
+    image_array = np.array(Image.open(path))
+    float_image_array = image_array.astype(float) / 255.0  # Normalize to [0, 1]
+    linearized_image_array = linearize(float_image_array)
+    #Scale back to 0-255 and store as uint8 so it can be converted to hsv
+    return (linearized_image_array * 255).astype(np.uint8)
 def resize_image(original_image_array, new_size):
     # Convert the NumPy array to a Pillow image
     img = Image.fromarray(original_image_array)
@@ -53,6 +64,7 @@ def pad_image(resized_img_array, target_size):
     padded = ImageOps.pad(img, target_size)
     return np.array(padded)
 def rgb_to_hsv(R,G,B):
+    #Scale the RGB values to the range 0-1
     r = R/255.0
     g = G/255.0
     b = B/255.0
@@ -60,68 +72,60 @@ def rgb_to_hsv(R,G,B):
     c_max = max(r,g,b)
     c_min = min(r,g,b)
     diff = c_max - c_min
-    #Calculate values
+    #Value is the largest channel
     v = c_max
-    
-    #Calculate hue based on channel maximum
+
+    #Calculate hue (in degrees) based on channel maximum
     if diff == 0:
-        h = 0
+        h = 0.0
     elif c_max == r:
-        h = (60*(g-b)/(diff))%360
+        h = (60*(g-b)/diff + 360) % 360
     elif c_max == g:
-        h = (60*(b-r)/(diff)+120)%360
-    elif c_max == b:
-        h = (60*(r-g)/(diff)+240)%360
-    
+        h = 60*((b-r)/diff + 2)
+    else:
+        h = 60*((r-g)/diff + 4)
+
     #Calculate saturation
     if c_max == 0:
-        s = 0
+        s = 0.0
     else:
         s = diff/c_max
-    
-    #Rescale between 0 to 255
+
+    #Rescale all three values to the range 0 to 255
     h = h*255/360
-    s *= 255
-    v *= 255
-        
+    s = s*255
+    v = v*255
+
     return h,s,v
 def convert_to_hsv(rgb_image):
-    height, width, depth = rgb_image.shape
-    hsv = np.zeros(height, width, depth) #Creates placeholder array for values
+    height, width = rgb_image.shape[:2]
+    hsv = np.zeros((height, width, 3)) #Creates placeholder array for values
     #Loops through each pixel and converts to hsv
     for i in range(height):
         for j in range(width):
             R, G, B = rgb_image[i, j, 0:3]
             hsv[i,j] = rgb_to_hsv(int(R), int(G), int(B))
-    hsv = hsv.astype(np.uint8)
+    #Round off tiny floating point error (e.g. 197.99999999 -> 198.0) before
+    #truncating to whole numbers
+    hsv = np.round(hsv, 6).astype(np.uint8)
     return hsv
 def main():
     path = input("Enter the path of the RGB image you want to convert to hsv: ")
     img_array = load_img(path)
-    hsv = convert_to_hsv(img_array)
-    # Resize to fit within 100 x 100 while keeping the aspect ratio
-    orig_height, orig_width = img_array.shape[:2]
-    orig_aspectRatio = orig_width / orig_height
-    target_aspectRatio = 100 / 100
-    if orig_aspectRatio >= target_aspectRatio:
-        new_width = 100
-        new_height = int(100 / orig_aspectRatio)
-    else:
-        new_height = 100
-        new_width = int(100 * orig_aspectRatio)
-    resized_img = resize_image(hsv, (new_width, new_height))
-    padded_img = pad_image(resized_img, (100, 100))
+    # Resize the image to 100 x 100
+    resized_img = resize_image(img_array, (100, 100))
+    # Convert the resized image to hsv
+    hsv = convert_to_hsv(resized_img)
     pixel_coords = input("Enter the coordinates of the pixel you want inspect: ")
     pixel_x, pixel_y = tuple(int(x) for x in pixel_coords.split(", "))
-    print(f"RGB values of the ({pixel_x}, {pixel_y}) pixel: R={img_array[pixel_x,pixel_y,0]}, G={img_array[pixel_x,pixel_y,1]}, B={img_array[pixel_x,pixel_y,2]}")
+    print(f"RGB values of the ({pixel_x}, {pixel_y}) pixel: R={resized_img[pixel_x,pixel_y,0]}, G={resized_img[pixel_x,pixel_y,1]}, B={resized_img[pixel_x,pixel_y,2]}")
     print(f"Converting {path} to HSV...")
     print(f"HSV values of the ({pixel_x}, {pixel_y}) pixel: H={hsv[pixel_x,pixel_y,0]}, S={hsv[pixel_x,pixel_y,1]}, V={hsv[pixel_x,pixel_y,2]}")
 
-
-    plt.imshow(padded_img)
+    plt.imshow(hsv)
     plt.axis("off")
     plt.show()
-    
+
 
 if __name__ == "__main__":
     main()
