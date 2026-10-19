@@ -38,13 +38,7 @@ from PIL import Image,ImageOps
 import matplotlib.pyplot as plt
 
 
-#Reused functions to linearize and load images
-def linearize(c):
-    return np.where(
-        c <= 0.04045,
-        c / 12.92,
-        ((c + 0.055) / 1.055) ** 2.4,
-    )
+#Reused functions to load images
 def load_img(path):
     image_array = np.array(Image.open(path))
     float_image_array = image_array.astype(float) / 255.0  # Normalize to [0, 1]
@@ -90,6 +84,12 @@ def rgb_to_hsv(R,G,B):
         s = 0.0
     else:
         s = diff/c_max
+    
+    #Rescale between 0 to 255
+    h = h*255/360
+    s *= 255
+    v *= 255
+        
 
     #Rescale all three values to the range 0 to 255
     h = h*255/360
@@ -116,6 +116,19 @@ def main():
     resized_img = resize_image(img_array, (100, 100))
     # Convert the resized image to hsv
     hsv = convert_to_hsv(resized_img)
+    hsv = convert_to_hsv(img_array)
+    # Resize to fit within 100 x 100 while keeping the aspect ratio
+    orig_height, orig_width = img_array.shape[:2]
+    orig_aspectRatio = orig_width / orig_height
+    target_aspectRatio = 100 / 100
+    if orig_aspectRatio >= target_aspectRatio:
+        new_width = 100
+        new_height = int(100 / orig_aspectRatio)
+    else:
+        new_height = 100
+        new_width = int(100 * orig_aspectRatio)
+    resized_img = resize_image(hsv, (new_width, new_height))
+    padded_img = pad_image(resized_img, (100, 100))
     pixel_coords = input("Enter the coordinates of the pixel you want inspect: ")
     pixel_x, pixel_y = tuple(int(x) for x in pixel_coords.split(", "))
     print(f"RGB values of the ({pixel_x}, {pixel_y}) pixel: R={resized_img[pixel_x,pixel_y,0]}, G={resized_img[pixel_x,pixel_y,1]}, B={resized_img[pixel_x,pixel_y,2]}")
