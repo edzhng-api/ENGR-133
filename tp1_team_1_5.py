@@ -1,0 +1,131 @@
+"""
+Course Number: ENGR 13300
+Semester: Fall 2026
+
+Description:
+    Converts an RGB image to HSV (each channel scaled to 0-255), prints the
+    RGB and HSV values of a chosen pixel, and displays the HSV image.
+
+Assignment Information:
+    Assignment:     TP1 Team 1
+    Team ID:        SC1 - 05
+    Author:         Edison Zheng, zhen1058@purdue.edu
+    Date:           10/15/2026
+
+Contributors:
+    Name, login@purdue [repeat for each]
+
+    My contributor(s) helped me:
+    [ ] understand the assignment expectations without
+        telling me how they will approach it.
+    [ ] understand different ways to think about a solution
+        without helping me plan my solution.
+    [ ] think through the meaning of a specific error or
+        bug present in my code without looking at my code.
+    Note that if you helped somebody else with their code, you
+    have to list that person as a contributor here as well.
+
+Academic Integrity Statement:
+    I have not used source code obtained from any unauthorized
+    source, either modified or unmodified; nor have I provided
+    another student access to my code.  The project I am
+    submitting is my own original work.
+"""
+
+import numpy as np
+import math as m
+from PIL import Image,ImageOps
+import matplotlib.pyplot as plt
+
+
+#Reused functions to linearize and load images
+def linearize(c):
+    return np.where(
+        c <= 0.04045,
+        c / 12.92,
+        ((c + 0.055) / 1.055) ** 2.4,
+    )
+def load_img(path):
+    image_array = np.array(Image.open(path))
+    float_image_array = image_array.astype(float) / 255.0  # Normalize to [0, 1]
+    linearized_image_array = linearize(float_image_array)
+    #Scale back to 0-255 and store as uint8 so it can be converted to hsv
+    return (linearized_image_array * 255).astype(np.uint8)
+def resize_image(original_image_array, new_size):
+    # Convert the NumPy array to a Pillow image
+    img = Image.fromarray(original_image_array)
+    # Resize with bilinear interpolation; new_size is (width, height)
+    resized = img.resize(new_size, Image.BILINEAR)
+    return np.array(resized)
+def pad_image(resized_img_array, target_size):
+    # Convert the NumPy array to a Pillow image
+    img = Image.fromarray(resized_img_array)
+    # Center the image on a black canvas of target_size (width, height)
+    padded = ImageOps.pad(img, target_size)
+    return np.array(padded)
+def rgb_to_hsv(R,G,B):
+    #Scale the RGB values to the range 0-1
+    r = R/255.0
+    g = G/255.0
+    b = B/255.0
+    #Calculate intermediate values
+    c_max = max(r,g,b)
+    c_min = min(r,g,b)
+    diff = c_max - c_min
+    #Value is the largest channel
+    v = c_max
+
+    #Calculate hue (in degrees) based on channel maximum
+    if diff == 0:
+        h = 0.0
+    elif c_max == r:
+        h = (60*(g-b)/diff + 360) % 360
+    elif c_max == g:
+        h = 60*((b-r)/diff + 2)
+    else:
+        h = 60*((r-g)/diff + 4)
+
+    #Calculate saturation
+    if c_max == 0:
+        s = 0.0
+    else:
+        s = diff/c_max
+
+    #Rescale all three values to the range 0 to 255
+    h = h*255/360
+    s = s*255
+    v = v*255
+
+    return h,s,v
+def convert_to_hsv(rgb_image):
+    height, width = rgb_image.shape[:2]
+    hsv = np.zeros((height, width, 3)) #Creates placeholder array for values
+    #Loops through each pixel and converts to hsv
+    for i in range(height):
+        for j in range(width):
+            R, G, B = rgb_image[i, j, 0:3]
+            hsv[i,j] = rgb_to_hsv(int(R), int(G), int(B))
+    #Round off tiny floating point error (e.g. 197.99999999 -> 198.0) before
+    #truncating to whole numbers
+    hsv = np.round(hsv, 6).astype(np.uint8)
+    return hsv
+def main():
+    path = input("Enter the path of the RGB image you want to convert to hsv: ")
+    img_array = load_img(path)
+    # Resize the image to 100 x 100
+    resized_img = resize_image(img_array, (100, 100))
+    # Convert the resized image to hsv
+    hsv = convert_to_hsv(resized_img)
+    pixel_coords = input("Enter the coordinates of the pixel you want inspect: ")
+    pixel_x, pixel_y = tuple(int(x) for x in pixel_coords.split(", "))
+    print(f"RGB values of the ({pixel_x}, {pixel_y}) pixel: R={resized_img[pixel_x,pixel_y,0]}, G={resized_img[pixel_x,pixel_y,1]}, B={resized_img[pixel_x,pixel_y,2]}")
+    print(f"Converting {path} to HSV...")
+    print(f"HSV values of the ({pixel_x}, {pixel_y}) pixel: H={hsv[pixel_x,pixel_y,0]}, S={hsv[pixel_x,pixel_y,1]}, V={hsv[pixel_x,pixel_y,2]}")
+
+    plt.imshow(hsv)
+    plt.axis("off")
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
