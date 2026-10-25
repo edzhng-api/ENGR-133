@@ -56,7 +56,12 @@ def rgb_to_grayscale(rgb_image):
     G = np.array(rgb_image)[:,:,1]
     B = np.array(rgb_image)[:,:,2]
     Y = 0.2126 * R + 0.7152 * G + 0.0722 * B
-    return Y
+    encoded = np.where(
+        Y <= 0.0031308,
+        12.92 * Y,
+        1.055 * Y ** (1 / 2.4) - 0.055,
+    )
+    return np.round(encoded * 255).astype(np.uint8)
 
 def create_gaussian_value(sigma, kernel_size, x, y):
     #Calculate the Gaussian weight at one kernel coordinate.
@@ -102,7 +107,7 @@ def apply_kernel(image, kernel):
     # Pad image with zeros
     padded = np.pad(image,((k_rows // 2, k_rows // 2), (k_cols // 2, k_cols // 2)),mode='constant', constant_values=0)
     # Create array of 0s having the same shape as the original image
-    output = np.zeros(rows, cols)
+    output = np.zeros((rows, cols))
     for i in range(rows):
         for j in range(cols):
             # Slice the padded image, add the output to output array
@@ -119,8 +124,8 @@ def sobel_filter(grayscale_img):
                        [1,2,1]], dtype=float)
     img_array = np.array(grayscale_img, dtype=float)
     rows, columns = img_array.shape
-    combined_img = np.zeros(rows, columns)
-    
+    combined_img = np.zeros((rows, columns))
+
     x_gradient = apply_kernel(img_array, sobel_x)
     y_gradient = apply_kernel(img_array, sobel_y)
     rows_g, columns_g = x_gradient.shape
@@ -140,7 +145,17 @@ def sobel_filter(grayscale_img):
     combined_img = combined_img.astype(np.uint8)
     return combined_img
 def main():
-    """Write your code here (and delete this line)."""
+    path = input("Enter the path to the image file: ")
+    img = load_img(path)
+    
+    grayscale_img = rgb_to_grayscale(img)
+    blurred = gaussian_filter(grayscale_img, 1)
+    sobel_filtered = sobel_filter(blurred)
+    
+    plt.imshow(sobel_filtered, cmap="gray", vmin=0, vmax=255)
+    plt.axis("off")
+    plt.savefig("sobel_img.png", bbox_inches="tight", pad_inches=0)
+    plt.show()
 
 
 if __name__ == "__main__":
