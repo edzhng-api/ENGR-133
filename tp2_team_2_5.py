@@ -86,9 +86,16 @@ def sobel_filter(grayscale_img):
     combined_img = combined_img.astype(np.uint8)
     return combined_img
 
-def load_img(path): #Opens the image and returns its RGB pixel values.
+def load_img(path):
+    """Load RGB pixels, linearize sRGB, and return values scaled to 0-255."""
     with Image.open(path) as pil_image:
-        return np.array(pil_image.convert("RGB"))
+        rgb = np.asarray(pil_image.convert("RGB"), dtype=np.float64) / 255.0
+    linear_rgb = np.where(
+        rgb <= 0.04045,
+        rgb / 12.92,
+        ((rgb + 0.055) / 1.055) ** 2.4,
+    )
+    return np.clip(linear_rgb * 255, 0, 255).astype(np.uint8)
 
 def rgb_to_grayscale(rgb_image):
     R = np.array(rgb_image)[:,:,0]
@@ -98,18 +105,20 @@ def rgb_to_grayscale(rgb_image):
     return Y
 
 def resize_image(original_image_array, new_size):
-    # Convert the NumPy array to a Pillow image
     img = Image.fromarray(original_image_array)
-    # Resize with bilinear interpolation; new_size is (width, height)
-    resized = img.resize(new_size, Image.BILINEAR)
+    resized = img.resize(new_size, Image.Resampling.BILINEAR)
     return np.array(resized)
 
 def pad_image(resized_img_array, target_size):
-    # Convert the NumPy array to a Pillow image
-    img = Image.fromarray(resized_img_array)
-    # Center the image on a black canvas of target_size (width, height)
-    padded = ImageOps.pad(img, target_size)
-    return np.array(padded) 
+    # Pad the image to the target size without stretching it
+    pil_img = Image.fromarray(resized_img_array)
+    padded_pil_img = ImageOps.pad(
+        pil_img,
+        target_size,
+        method=Image.Resampling.BILINEAR,
+        color=(0, 0, 0)
+    )
+    return np.array(padded_pil_img)
 
 def rgb_to_hsv(R,G,B):
     #Scale the RGB values to the range 0-1
@@ -129,9 +138,9 @@ def rgb_to_hsv(R,G,B):
     elif c_max == r:
         h = (60*(g-b)/diff + 360) % 360
     elif c_max == g:
-        h = 60*((b-r)/diff + 2)
+        h = (60*((b-r)/diff) + 120) % 360
     else:
-        h = 60*((r-g)/diff + 4)
+        h = (60*((r-g)/diff) + 240) % 360
 
     #Calculate saturation
     if c_max == 0:
@@ -148,15 +157,15 @@ def rgb_to_hsv(R,G,B):
 
 def convert_to_hsv(rgb_image):
     height, width = rgb_image.shape[:2]
-    hsv = np.zeros((height, width, 3)) #Creates placeholder array for values
+    hsv = np.zeros((height, width, 3), dtype=np.uint8) #Creates placeholder array for values
     #Loops through each pixel and converts to hsv
     for i in range(height):
         for j in range(width):
             R, G, B = rgb_image[i, j, 0:3]
-            hsv[i,j] = rgb_to_hsv(int(R), int(G), int(B))
-    #Round off tiny floating point error (e.g. 197.99999999 -> 198.0) before
-    #truncating to whole numbers
-    hsv = np.round(hsv, 6).astype(np.uint8)
+            h, s, v = rgb_to_hsv(int(R), int(G), int(B))
+            hsv[i, j, 0] = int(h)
+            hsv[i, j, 1] = int(s)
+            hsv[i, j, 2] = int(v)
     return hsv
 
 def create_gaussian_value(sigma, kernel_size, x, y):
@@ -176,7 +185,6 @@ def create_gaussian_kernel(sigma):
         kernel_list.append(col)
     kernel = np.array(kernel_list)
     return kernel / np.sum(kernel)
-
 
 def gaussian_filter(image, sigma):
     #Blur a two-dimensional image with a normalized Gaussian kernel.
@@ -250,48 +258,25 @@ def extract_features(img_array):
     number_lines = count_lines(gray_image)
     has_circle = detect_circle(gray_image)
     has_triangle = detect_triangle(gray_image)
-    return [np.float32(hue_mean), np.float32(hue_std), np.float32(saturation_mean), np.float32(saturation_std), np.float32(value_mean), np.float32(value_std), np.uint8(number_lines), np.int8(has_circle), np.int8(has_triangle)]
+    return [hue_mean, hue_std, saturation_mean, saturation_std, value_mean, value_std, np.uint8(number_lines), np.int8(has_circle), np.int8(has_triangle)]
 
 def main():
-    if False:  # Set to True for testing, False for user input
-        folder = "ML_Images"
-        metadata = "img_metadata.csv"
-        output = "img_features.csv"
-        path_image_features = "0761.png"
-    else:
-        folder = input("Enter the name of the dataset folder:\n")
-        metadata = input("Enter the name of the metadata file:\n")
-        output = input("Enter the name of output csv features file:\n")
 
-    if not metadata.endswith(".csv"):
-        metadata += ".csv"
-    if not output.endswith(".csv"):
-        output += ".csv"
+    folder = input("Enter the name of the dataset folder:\n")
+    metadata = input("Enter the name of the metadata file:\n")
+    output = input("Enter the name of output csv features file:\n")
     metadata_path = Path(metadata)
+    metadata_df = pd.read_csv(metadata_path)
     output_path = Path(output)
-    if metadata_path.resolve() == output_path.resolve():
-        raise ValueError("The metadata file and output file must be different.")
-    try:
-        metadata_df = pd.read_csv(metadata_path)
-    except pd.errors.EmptyDataError as exc:
-        raise ValueError(
-            f"Metadata file '{metadata}' is empty. It must contain a 'Path' column "
-            "with the image paths."
-        ) from exc
-    required_columns = {"Path", "ClassId"}
-    missing_columns = required_columns.difference(metadata_df.columns)
-    if missing_columns:
-        raise ValueError(
-            f"Metadata file '{metadata}' must contain the following columns: "
-            f"{', '.join(sorted(missing_columns))}."
-        )
-    output_path.open("w+").close()  # Clears the output file or creates it if it doesn't exist
+   
+    output_path.open("w+").close  # Clears the output file or creates it if it doesn't exist
     print(f"Training Metadata DataFrame:\n{metadata_df.head()}") # Prints the first 5 rows of the metadata file to verify it was loaded correctly.
     features_list = []  # Initialize an empty list to hold feature vectors
     for _, metadata_row in metadata_df.iterrows():
         path = metadata_row["Path"]
         full_path = f"{folder}/{path}"  # Construct the full path to the image
-        img_array = pad_image(resize_image(load_img(full_path), (100, 100)), (100, 100))  # Load and preprocess the image
+        
+        img_array = resize_image(load_img(full_path), (100, 100))  # Load and preprocess the image
         features = extract_features(img_array)  # Extract features from the image
         features_list.append(features + [path, metadata_row["ClassId"]])
 
@@ -307,8 +292,7 @@ def main():
     
     print(f"\nFeature Dataset Head:\n{output_df.head()}")
     
-    if not path_image_features:
-        path_image_features = input("\nEnter the Path of the image you want to display the features for:\n")
+    path_image_features = input("\nEnter the Path of the image you want to display the features for:\n")
 
     print(f"\nFeatures for {path_image_features}:\n{output_df.loc[metadata_df['Path'] == path_image_features]}")
 
