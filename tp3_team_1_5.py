@@ -80,7 +80,25 @@ def train_val_test_split(x, y, train_ratio=0.8, val_ratio=0.1, test_ratio=0.1):
     y_test = y[x_row_train+x_row_val:]
     return x_train, y_train, x_val, y_val, x_test, y_test
 def knn_single_prediction(new_example, x_train, y_train, k):
-    return
+    #Find the distance of each feature in new_example to features in x_train
+    distance = np.linalg.norm(x_train-new_example, 2, 1)
+    #Calculate index of the nearest k examples
+    sorted_index = np.argsort(distance)[:k]
+    
+    #Find most common label and predict label based on result
+    deer_count = 0
+    leftturn_count = 0
+    for i in range(y_train[:sorted_index].size):
+        if y_train[i] == 0:
+            deer_count+=1
+        else:
+            leftturn_count+=1
+    if deer_count > leftturn_count:
+        predicted_label=0
+    else:
+        predicted_label=1
+    
+    return predicted_label
 def predict_labels_knn(X_new, x_train, y_train, k):
     return
 def calculate_metics(predicted_labels, true_labels):
