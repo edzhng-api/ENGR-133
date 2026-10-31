@@ -6,7 +6,7 @@ Description:
     Replace this line with a description of your program.
 
 Assignment Information:
-    Assignment:     e.g. 7.2.1 Py1 Team 1 (for Python 1 Team task 1)
+    Assignment:     TP3 Team 1
     Team ID:        SC1 - 05
     Author:         Edison Zheng, zhen1058@purdue.edu
     Date:           10/29/26
@@ -100,9 +100,18 @@ def knn_single_prediction(new_example, x_train, y_train, k):
     
     return predicted_label
 def predict_labels_knn(X_new, x_train, y_train, k):
-    return
+    n_new = X_new.shape[0]
+    predicted_labels = np.zeros(n_new, dtype=int)
+
+    for i in range(n_new):
+        # Check this argument order against your own knn_single_prediction
+        predicted_labels[i] = knn_single_prediction(X_new[i], x_train, y_train, k)
+
+    return predicted_labels
 def calculate_metics(predicted_labels, true_labels):
-    return
+    accuracy = float(np.mean(predicted_labels == true_labels))
+    error = 1 - accuracy
+    return accuracy, error
 def main():
     """Write your code here (and delete this line)."""
 
